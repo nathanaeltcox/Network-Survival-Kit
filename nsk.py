@@ -1,55 +1,55 @@
 #!/usr/bin/env python
 import argparse
 
-#Super wordy way to import.
-#import modules.pingsweep
-#import modules.traceroute
-
-#Efficient alias way to import.
-#import modules.pingsweep as ps
-#import modules.traceroute as ts
-#import modules.portscanner as pscan
-
 #Import explicit functions.
-from modules.pingsweep import pingsweep as ps, set_ttl
-from modules.traceroute import traceroute as tr
-from modules.portscanner import port_scan as pscan
+from modules.pingsweep import ping_sweep as ps
+from modules.portscan import port_scan as pscan
+from modules.macaddresslookup import mac_lookup as maclu
+from modules.datacollect import data_collect as dcol
 
 def pingsweep(args):
-    ps(args.ip)
-    set_ttl(1200)
-    ps(args.ip)
+    ps(args.ip, args.c, args.time, args.output)
 
-def traceroute(args):
-    tr(args.target)
+def portscan(args):
+    pscan(args.ip, args.range, args.time, args.output)
 
-def portscanner(args):
-    pscan(args.ip, args.range)
+def macaddresslookup(args):
+    maclu(args.mac, args.time, args.output)
+
+def datacollect(args):
+    dcol(args.output, args.pingsweep, args.portscan, args.maclookup)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="Network Survival Kit", 
                                     description="Command line network toolkit.")
     
-#    parser.add_argument("ip", nargs=1, default="127.0.0.1", help="Taget IP address")
-#    parser.add_argument("--port", "-p", type=int)
-#    parser.add_argument("--protocol", "-P", nargs="?", default="tcp", 
-#                        choices=["tcp", "udp", "icmp"])
-    parser.add_argument("--output", "-o", nargs=1, help="File name to write results to")
+    parser.add_argument("--time", "-t", help="Time the function", action="store_true")
 
     subparsers = parser.add_subparsers(help="Module specific utilities.")
 
     parser_pingsweep = subparsers.add_parser("pingsweep", help="Perform network ping sweep")
     parser_pingsweep.add_argument("ip", nargs=1, help="Target IP address")
+    parser_pingsweep.add_argument("-c", nargs="?", default="5", help="Number of requests to send to host; tracks latency times")
+    parser_pingsweep.add_argument("--output", "-o", nargs=1, default=["PingsweepResults"], help="File name to write results to")
     parser_pingsweep.set_defaults(func=pingsweep)
  
-    parser_traceroute = subparsers.add_parser("traceroute", help="Track hops from host to target")
-    parser_traceroute.add_argument("target", nargs=1, help="Target host to trace path to")
-    parser_traceroute.set_defaults(func=traceroute)
+    parser_portscan = subparsers.add_parser("portscan", help="Find open ports at IP address location")
+    parser_portscan.add_argument("ip", nargs=1, help="Target IP address")
+    parser_portscan.add_argument("--range", "-r", nargs="?", default="1-65536", help="Range of ports to scan")
+    parser_portscan.add_argument("--output", "-o", nargs=1, default=["PortscanResults"], help="File name to write results to")
+    parser_portscan.set_defaults(func=portscan)
 
-    parser_portscanner = subparsers.add_parser("portscanner", help="Find open ports at IP address location")
-    parser_portscanner.add_argument("ip", nargs=1, help="Target IP address")
-    parser_portscanner.add_argument("--range", "-r", nargs="?", default="1-65536", help="Range of ports to scan")
-    parser_portscanner.set_defaults(func=portscanner)
+    parser_macaddresslookup = subparsers.add_parser("maclookup", help="Get info on mac addresses")
+    parser_macaddresslookup.add_argument("mac", nargs=1, help="Mac address to get info on")
+    parser_macaddresslookup.add_argument("--output", "-o", nargs=1, default=["MacLookupResults"], help="File name to write results to")
+    parser_macaddresslookup.set_defaults(func=macaddresslookup)
+
+    parser_datacollect = subparsers.add_parser("collect", help="Collects and consolidates all data from other scans") 
+    parser_datacollect.add_argument("--output", "-o", nargs=1, default=["Report"], help="File name to write results to")
+    parser_datacollect.add_argument("--pingsweep", "-ps", nargs=1, default=["PingsweepResults"], help="Name of file to cellect data from")
+    parser_datacollect.add_argument("--portscan", "-pscan", nargs=1, default=["PortscanResults"], help="Name of file to cellect data from")
+    parser_datacollect.add_argument("--maclookup", "-maclu", nargs=1, default=["MacLookupResults"], help="Name of file to cellect data from")
+    parser_datacollect.set_defaults(func=datacollect)
 
     args = parser.parse_args()
     args.func(args)
