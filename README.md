@@ -48,5 +48,5 @@ the file your results will be saved in. The default filename is "Report.txt".
 For example:
 	python nsk.py collect (Consolidates results from all previous scans in a single file called "Report.txt", assuming everything was 
 saved using default filenames.)
-	python nsk.py collect -ps PingsweepOutput (Consolidates results when the pingsweep results were saved as "PinsweepOutput.txt" instead
+	python nsk.py collect -ps PingsweepOutput (Consolidates results when the pingsweep results were saved as "PinsgweepOutput.txt" instead
 of the default.)
